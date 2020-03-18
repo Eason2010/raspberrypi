@@ -1,0 +1,48 @@
+
+树莓派4B安装centos7.7后连接磁盘、挂载、创建PV/VG/LV/FS文件系统
+v1.0
+20200318.001
+
+1.用lsblk或fdisk -l来查看磁盘
+	[root@localhost power]# lsblk
+	NAME            MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+	sda               8:0    1  7.5G  0 disk 
+	mmcblk0         179:0    0 14.9G  0 disk 
+	|-mmcblk0p2     179:2    0  488M  0 part [SWAP]
+	|-mmcblk0p3     179:3    0 14.1G  0 part /
+	`-mmcblk0p1     179:1    0  286M  0 part /boot
+  
+2. 用fdisk /dev/sda来创建分区，命令在 树莓派4B安装centos7.7后的wifi配置和根目录扩展 里面有。
+   用fdisk -l 命令检查刚刚所建分区，可以在返回结果中确认/dev/sda1的信……
+   如果不做这一步，直接做下一步也没发现有什么问题。
+
+3. 使用命令 pvcreate /dev/sda命令来建立一个pv。用pvdisplay命令可以查看pv的情况。
+
+4. 使用命令vgcreate vg_ftp /dev/sda命令创建一个叫vg_ftp的vg，可用vgdisplay命令来查看vg的情况。
+
+5. 使用命令lvcreate -L 7.4G -n lv_ftp vg_ftp 创建一个叫lv_ftp的lv。用lvdisplay命令可以查看lv的情况。
+
+6. 使用命令 mkfs.ext4 /dev/vg_ftp/lv_ftp  格式化这个lv为ext4格式。
+   使用命令 mkdir /ftp 创建一个挂载点目录，
+   用mount /dev/vg_ftp/lv_ftp /ftp 命令加载lv到/ftp目录上，之后用df -k命令可以查看结果。
+   
+   
+7. 使用命令 lvextend 可以扩展lv大小，
+8. 使用命令 vgextend 可以扩展vg的大小，
+
+9. 使用命令 lvreduce 可以减少lv大小，先umount fs，然后lvreduce，然后重新mount，df察看一下容量的减小
+
+10. 使用命令 pvmove 可以搬移PV中的资料(只限于同一VG中)
+    #pvmove /dev/hda5 /dev/hda6
+    将VG中pv hda5的内容搬移到hda6中
+
+11. vgreduce rootvg /dev/hda5
+  把vg hda5移除
+
+12. lvremove vgcremove pvremove 等等命令
+
+13. 查看分区类型
+	df -T 命令查看文件系统类型在Type列输出。只可以查看已经挂载的分区和文件系统类型。
+	parted -l 命令会输出文件系统类型（File system）， 其中参数l表示列出所有设备的分区信息。
+	blkid命令查看已格式化分区的UUID和文件系统。使用blkid可以输出分区或分区的文件系统类型，查看TYPE字段输出。
+	命令lsblk -f 查看也可以查看未挂载的文件系统类型
