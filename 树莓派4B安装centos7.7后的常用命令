@@ -1,0 +1,45 @@
+
+20200318.003
+V1.0
+
+
+树莓派4B安装centos7.7后的常用命令
+
+
+1.读取树莓派4B处理器(CPU)的实时温度
+  打开终端
+  cd /sys/class/thermal/thermal_zone0 
+  查看温度
+  cat temp
+  树莓派的返回值 
+  53069
+  返回值除以1000为当前CPU温度值。即当前温度为53摄氏度。
+  
+  
+2.查看内存大小，这里的是1.9G；也可以用free -g(以G为单位），free -m(以m为单位）
+	[root@localhost power]# free -h
+	              total        used        free      shared  buff/cache   available
+	Mem:           1.9G         89M        1.7G         16M        130M        1.8G
+	Swap:          487M          0B        487M
+  
+3.其他
+uname -a # 查看内核/操作系统/CPU信息的linux系统信息  
+fdisk -l # 查看所有分区   
+swapon -s # 查看所有交换分区  
+free -m # 查看内存使用量和交换区使用量   
+df -h # 查看各分区使用情况  
+du -sh # 查看指定目录的大小 
+env # 查看环境变量资源  
+uptime # 查看系统运行时间、用户数、负载  
+cat /proc/loadavg # 查看系统负载磁盘和分区   
+mount | column -t # 查看挂接的分区状态  
+top # 实时显示进程状态用户  
+rpm -qa # 查看所有安装的软件包   
+cat /proc/cpuinfo ：查看CPU相关参数的linux系统命令  
+cat /proc/partitions ：查看linux硬盘和分区信息的系统信息命令   
+cat /proc/meminfo ：查看linux系统内存信息的linux系统命令  
+cat /proc/version ：查看版本，类似uname -r   
+cat /proc/ioports ：查看设备io端口  
+cat /proc/interrupts ：查看中断   
+cat /proc/pci ：查看pci设备的信息  
+cat /proc/swaps ：查看所有swap分区的信息  
