@@ -1,0 +1,22 @@
+
+树莓派安装centos7.7
+
+
+
+1. 拿到树莓派4B之后，用读卡器把SD卡连接到电脑，用下面的软件把SD卡格式化。
+  SD Card Formatter 5.0.1 
+
+2. 从网站上下载CentOS7.7 for RaspberryPI版本，网站
+  CentOS-Userland-7-armv7hl-RaspberryPI-Minimal-4-1908-sda.raw.xz
+  解压缩为CentOS-Userland-7-armv7hl-RaspberryPI-Minimal-4-1908-sda.raw
+  不知道为什么，试了以下两个版本都不好使
+  CentOS-Userland-7-armv7hl-RaspberryPI-GNOME-1908-sda.raw.xz
+  CentOS-Userland-7-armv7hl-RaspberryPI-Minimal-1908-sda.raw.xz
+
+3.用下面的软件把系统烧录到SD卡上
+  win32diskimager-1.0.0
+  选择CentOS-Userland-7-armv7hl-RaspberryPI-Minimal-4-1908-sda.raw （注意没有后面的.raw）
+
+4.给树莓派加电，在路由器上找到树莓派的IP地址，用putty或SecureCRT通过ssh到树莓派，用户名/密码：root/centos
+  如果找不到IP，可以试试用下面的软件来扫描IP段试试能不能发现
+  ipscan22
