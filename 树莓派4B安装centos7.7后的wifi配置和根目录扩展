@@ -1,0 +1,60 @@
+20200318.002
+树莓派4B安装centos7.7后的wifi配置和根目录扩展
+
+
+
+wifi配置
+  用root进入centos后
+1. nmcli radio  //查看网卡设备状态
+2. nmcli device //查看网卡驱动状态
+3. nmcli device wifi rescan //扫描wifi信号
+4. nmcli device wifi list //获取wifi热点列表
+5. nmcli device wifi connect "SSIDName" password "wireless password"  //"SSIDName"是你的SSID名， "wireless password" 是无线密码
+    如果SSID是隐藏了，要把SSID改为可发现。
+6. ifconfig //查看wifi的网卡是否获得IP了
+
+
+
+根目录扩展
+  树莓派4B安装centos7.7后的根只分配1.4G，根本不够
+  用root进入centos后
+1. df -H  //查看
+2. lsblk  //查看分区挂载情况
+	[root@localhost power]# lsblk
+	NAME            MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+	mmcblk0         179:0    0 14.9G  0 disk 
+	|-mmcblk0p2     179:2    0  488M  0 part [SWAP]
+	|-mmcblk0p3     179:3    0  1.41G  0 part /
+	`-mmcblk0p1     179:1    0  286M  0 part /boot
+3. 可以知道根目录挂载的是mmcblk0p3分区，调整mmcblk0p3的分区大小即可。
+fdisk -l /dev/mmcblk0   //记下mmcblk0p3的开始扇区1593344，后在要用到(默认的一直敲回车就行)
+	[root@localhost power]# fdisk -l /dev/mmcblk0
+	
+	Disk /dev/mmcblk0: 15.9 GB, 15931539456 bytes, 31116288 sectors
+	Units = sectors of 1 * 512 = 512 bytes
+	Sector size (logical/physical): 512 bytes / 512 bytes
+	I/O size (minimum/optimal): 512 bytes / 512 bytes
+	Disk label type: dos
+	Disk identifier: 0x00060b0d
+	
+	        Device Boot      Start         End      Blocks   Id  System
+	/dev/mmcblk0p1   *        8192      593919      292864    c  W95 FAT32 (LBA)
+	/dev/mmcblk0p2          593920     1593343      499712   82  Linux swap / Solaris
+	/dev/mmcblk0p3         1593344    31116287    14761472   83  Linux
+
+通过输入d删除分区(默认的一直敲回车就行)
+输入 n 新建分区(之后一直敲回车就行)
+  ......
+	Select (default p): p
+	Partition number (3,4, default 3): 3
+	First sector (2369536-62333951, default 2369536):1593344  <<<<<<这里一定要填写上面的mmcblk0p3的开始扇区1593344，不然重启会启不来
+	Using default value 2369536
+	Last sector, +sectors or +size{K,M,G} (2369536-62333951, default 62333951):
+	Using default value 62333951
+	Partition 3 of type Linux and of size 28.6 GiB is set
+  ......
+  
+输入p，查看分区结果
+输入w写入分区
+reboot重启
+重启之后，执行命令resize2fs /dev/mmcblk0p3，使分区生效。
