@@ -1,0 +1,56 @@
+
+1.拉取镜像。关于这个工具的镜像有很多，其中我更倾向于使用 linuxserver/syncthing。
+	docker pull linuxserver/syncthing
+	官方的docker pull syncthing/syncthing有权限问题，在启动的时候总是报standard_init_linux.go:178: exec user process caused "exec format error"
+	可能是我的操作有问题
+		[root@localhost /]# docker pull linuxserver/syncthing
+		Using default tag: latest
+		Trying to pull repository docker.io/linuxserver/syncthing ... 
+		latest: Pulling from docker.io/linuxserver/syncthing
+		c5e0817d082c: Pull complete 
+		3eeffaa71d36: Pull complete 
+		e4a74a3576c1: Pull complete 
+		1f31f2897bb0: Pull complete 
+		80dbeef947ab: Pull complete 
+		8495b2f1a77a: Pull complete 
+		Digest: sha256:ca813e88be73f82d30e0a96a51235e2198c1f82a65f3a670a53bd33f81459d1d
+		Status: Downloaded newer image for docker.io/linuxserver/syncthing:latest
+
+2. 建立容器。使用命令
+docker create \
+  --name=syncthing \    # 容器名称
+  -e PUID=1000 \        # UserID
+  -e PGID=1000 \        # GroupID
+  -e TZ=Asia/Shanghai \    # 时区
+  -e UMASK_SET=022 \    # 文件夹权限
+  -p 8384:8384 \        # 对外端口映射 - GUI端口
+  -p 22000:22000 \        # 对外端口映射 - 协议端口
+  -p 21027:21027/udp \    # 对外端口映射 - 本地发现端口
+  -v /path/to/appdata/config:/config \    #文件夹映射 - 程序文件
+  -v /path/to/data1:/data1 \    # 文件夹映射（自定义数据文件夹）
+  -v /path/to/data2:/data2 \    # 文件夹映射（自定义数据文件夹）
+  --restart unless-stopped \    # 始终重启容器
+  linuxserver/syncthing
+	其中，参数name、TZ、-p、-v都可以根据自己的情况进行修改。对于这几个端口，保证本机相应的端口没有被占用且没有被防火墙限制即可。
+        [root@localhost /]# docker create \
+					>   --name=syncthing \
+					>   -e PUID=1000 \
+					>   -e PGID=1000 \
+					>   -e TZ=Asia/Shanghai \
+					>   -e UMASK_SET=022 \
+					>   -p 8384:8384 \
+					>   -p 22000:22000 \
+					>   -p 21027:21027/udp \
+					>   -v /path/to/data1:/ftp \
+					>   --restart unless-stopped \
+					>   linuxserver/syncthing
+					d7dbf77f5514f10e92ae37ea4fa5371f3d3e8ebf74e2620d560b3b2351e3dc6e
+					
+3. 启动容器
+	docker start syncthing
+		[root@localhost /]# docker start syncthing
+			syncthing
+			
+	现在，你就可以打开ip:8384映射出来的端口号在图形化界面中设置了。其中，ip地址需要使用:
+		本机，使用地址127.0.0.1
+		服务器，使用地址服务器公网ip

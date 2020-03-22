@@ -1,0 +1,72 @@
+
+1.Docker 需要lxc 和cgroup 支持,内核版本大于3.8，需要root 用户操作。	
+	查看版本 
+	cat /proc/version  
+	[root@localhost log]# cat /proc/version
+	Linux version 4.19.110-v7l.1.el7 (mockbuild@armhfp-02.bsys.centos.org) (gcc version 4.8.5 20150623 (Red Hat 4.8.5-39) (GCC)) #1 SMP Mon Mar 16 16:22:29 UTC 2020
+	
+	安装  cgroup
+	yum install libcgroup
+
+	安装docker
+	yum install docker
+	
+	启动docker
+	systemctl start docker
+	设置开机启动docker
+	systemctl enable docker
+	查看docker
+	docker info
+	查看 Docker 版本
+	docker -v
+	验证docker
+	docker run hello-world
+	运行容器
+	docker ps
+	查看所有下载的镜像
+	docker images
+	
+	
+2.安装portainer
+	搜索portainer镜像
+	docker search portainer
+	
+	拉取portainer的image
+	docker pull portainer/portainer
+	
+	运行之前先关闭selinux（需要重启）
+		CentOS 7.X 关闭SELinux
+			1、查看
+			[root@dev-server ~]# getenforce
+			Disabled
+			[root@dev-server ~]# /usr/sbin/sestatus -v
+			SELinux status:                 disabled
+			2、临时关闭
+			##设置SELinux 成为permissive模式
+			##setenforce 1 设置SELinux 成为enforcing模式
+			setenforce 0
+			3、永久关闭
+			vi /etc/selinux/config
+			将SELINUX=enforcing改为SELINUX=disabled
+			设置后需要重启才能生效
+
+
+	为portainer创建一个volume（也可以不创建）
+	docker volume create portainer_volume
+	
+	启动portainer容器
+	run -d -p 9000:9000 --restart=always -v /var/run/docker.sock:/var/run/docker.sock --name prtainer-test portainer/portainer
+	该语句用宿主机9000端口关联容器中的9000端口，并给容器起名为portainer-test。执行完该命令之后，使用该机器IP:PORT即可访问Portainer。
+	该容器命名为prtainer-test，将容器中portainer默认端口9000，映射到宿主机端口9001，使用socket映射 /var/run/docker.sock:/var/run/docker.sock，容器基于portainer/portainer镜像启动。
+	
+	访问
+	http://IP:9000
+	首次登陆需要注册用户，给管理员用户admin设置密码。
+	
+	单机版这里选择local即可，选择完毕，点击Connect即可连接到本地docker
+	
+	Ensure that you have started the Portainer container with the following Docker flag:
+		-v "/var/run/docker.sock:/var/run/docker.sock" (Linux).
+	注意：该页面上有提示需要挂载本地 /var/run/docker.socker与容器内的/var/run/docker.socker连接。因此，在启动时必须指定该挂载文件。
+	
+	

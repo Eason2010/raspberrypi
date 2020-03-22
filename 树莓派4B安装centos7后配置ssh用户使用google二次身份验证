@@ -1,0 +1,337 @@
+
+
+Centos7.7 5SSH登录使用google二次验证
+
+一般ssh登录服务器，只需要输入账号和密码，但为了更安全，在账号和密码之间再增加一个google的动态验证码。谷歌身份验证器生成的是动态验证码，默认30秒更新
+
+1.关闭SELINUX
+	vi /etc/selinux/config
+		SELINUX=disabled
+		
+2.安装编辑工具包
+	直接使用yum的静默安装，出现Complete!且中间没有Error说明安装完成
+		yum -y install gcc make pam-devel libpng-devel libtool wget git
+
+3.安装Qrencode
+	yum install mercurial
+	
+4.安装google authenticator PAM插件
+	使用git clone下载google-authenticator-libpam
+	git clone https://github.com/google/google-authenticator-libpam.git
+		[root@localhost ~]# git clone https://github.com/google/google-authenticator-libpam.git
+		正克隆到 'google-authenticator-libpam'...
+		remote: Enumerating objects: 48, done.
+		remote: Counting objects: 100% (48/48), done.
+		remote: Compressing objects: 100% (36/36), done.
+		remote: Total 844 (delta 28), reused 30 (delta 12), pack-reused 796
+		接收对象中: 100% (844/844), 583.65 KiB | 317.00 KiB/s, done.
+		处理 delta 中: 100% (536/536), done.
+		
+	进入google-authenticator-libpam目录
+	cd google-authenticator-libpam/
+		[root@localhost ~]# cd google-authenticator-libpam/    
+
+5.编译并安装
+	./bootstrap.sh && ./configure && make && make install
+			[root@localhost google-authenticator-libpam]# ./bootstrap.sh
+			libtoolize: putting auxiliary files in AC_CONFIG_AUX_DIR, `build'.
+			libtoolize: copying file `build/ltmain.sh'
+			libtoolize: putting macros in AC_CONFIG_MACRO_DIR, `build'.
+			libtoolize: copying file `build/libtool.m4'
+			libtoolize: copying file `build/ltoptions.m4'
+			libtoolize: copying file `build/ltsugar.m4'
+			libtoolize: copying file `build/ltversion.m4'
+			libtoolize: copying file `build/lt~obsolete.m4'
+			configure.ac:16: installing 'build/config.guess'
+			configure.ac:16: installing 'build/config.sub'
+			configure.ac:13: installing 'build/install-sh'
+			configure.ac:13: installing 'build/missing'
+			Makefile.am: installing 'build/depcomp'
+			parallel-tests: installing 'build/test-driver'
+			[root@localhost google-authenticator-libpam]# ./configure
+			checking whether make supports nested variables... yes
+			checking for gcc... gcc
+			checking whether the C compiler works... yes
+			checking for C compiler default output file name... a.out
+			checking for suffix of executables... 
+			checking whether we are cross compiling... no
+			checking for suffix of object files... o
+			checking whether we are using the GNU C compiler... yes
+			checking whether gcc accepts -g... yes
+			checking for gcc option to accept ISO C89... none needed
+			checking how to run the C preprocessor... gcc -E
+			checking for grep that handles long lines and -e... /usr/bin/grep
+			checking for egrep... /usr/bin/grep -E
+			checking for ANSI C header files... yes
+			checking for sys/types.h... yes
+			checking for sys/stat.h... yes
+			checking for stdlib.h... yes
+			checking for string.h... yes
+			checking for memory.h... yes
+			checking for strings.h... yes
+			checking for inttypes.h... yes
+			checking for stdint.h... yes
+			checking for unistd.h... yes
+			checking minix/config.h usability... no
+			checking minix/config.h presence... no
+			checking for minix/config.h... no
+			checking whether it is safe to define __EXTENSIONS__... yes
+			checking for a BSD-compatible install... /usr/bin/install -c
+			checking whether build environment is sane... yes
+			checking for a thread-safe mkdir -p... /usr/bin/mkdir -p
+			checking for gawk... gawk
+			checking whether make sets $(MAKE)... yes
+			checking for style of include used by make... GNU
+			checking dependency style of gcc... gcc3
+			checking whether to enable maintainer-specific portions of Makefiles... yes
+			checking build system type... armv7l-unknown-linux-gnueabihf
+			checking host system type... armv7l-unknown-linux-gnueabihf
+			checking how to print strings... printf
+			checking for a sed that does not truncate output... /usr/bin/sed
+			checking for fgrep... /usr/bin/grep -F
+			checking for ld used by gcc... /usr/bin/ld
+			checking if the linker (/usr/bin/ld) is GNU ld... yes
+			checking for BSD- or MS-compatible name lister (nm)... /usr/bin/nm -B
+			checking the name lister (/usr/bin/nm -B) interface... BSD nm
+			checking whether ln -s works... yes
+			checking the maximum length of command line arguments... 1572864
+			checking whether the shell understands some XSI constructs... yes
+			checking whether the shell understands "+="... yes
+			checking how to convert armv7l-unknown-linux-gnueabihf file names to armv7l-unknown-linux-gnueabihf format... func_convert_file_noop
+			checking how to convert armv7l-unknown-linux-gnueabihf file names to toolchain format... func_convert_file_noop
+			checking for /usr/bin/ld option to reload object files... -r
+			checking for objdump... objdump
+			checking how to recognize dependent libraries... pass_all
+			checking for dlltool... no
+			checking how to associate runtime and link libraries... printf %s\n
+			checking for ar... ar
+			checking for archiver @FILE support... @
+			checking for strip... strip
+			checking for ranlib... ranlib
+			checking command to parse /usr/bin/nm -B output from gcc object... ok
+			checking for sysroot... no
+			checking for mt... no
+			checking if : is a manifest tool... no
+			checking for dlfcn.h... yes
+			checking for objdir... .libs
+			checking if gcc supports -fno-rtti -fno-exceptions... no
+			checking for gcc option to produce PIC... -fPIC -DPIC
+			checking if gcc PIC flag -fPIC -DPIC works... yes
+			checking if gcc static flag -static works... no
+			checking if gcc supports -c -o file.o... yes
+			checking if gcc supports -c -o file.o... (cached) yes
+			checking whether the gcc linker (/usr/bin/ld) supports shared libraries... yes
+			checking whether -lc should be explicitly linked in... no
+			checking dynamic linker characteristics... GNU/Linux ld.so
+			checking how to hardcode library paths into programs... immediate
+			checking whether stripping libraries is possible... yes
+			checking if libtool supports shared libraries... yes
+			checking whether to build shared libraries... yes
+			checking whether to build static libraries... yes
+			checking for gcc... (cached) gcc
+			checking whether we are using the GNU C compiler... (cached) yes
+			checking whether gcc accepts -g... (cached) yes
+			checking for gcc option to accept ISO C89... (cached) none needed
+			checking for gcc option to accept ISO C99... -std=gnu99
+			checking for gcc -std=gnu99 option to accept ISO Standard C... (cached) -std=gnu99
+			checking sys/fsuid.h usability... yes
+			checking sys/fsuid.h presence... yes
+			checking for sys/fsuid.h... yes
+			checking for explicit_bzero... no
+			checking for setfsuid... yes
+			checking for security/pam_appl.h... yes
+			checking for security/pam_modules.h... yes
+			checking for pam_get_user in -lpam... yes
+			checking whether certain PAM functions require const arguments... yes
+			checking whether compiler understands -Wall... yes
+			checking for library containing dlopen... -ldl
+			checking that generated files are newer than configure... done
+			configure: creating ./config.status
+			config.status: creating Makefile
+			config.status: creating contrib/rpm.spec
+			config.status: creating config.h
+			config.status: executing depfiles commands
+			config.status: executing libtool commands
+			
+			  google-authenticator version 1.08
+			  Prefix.........: /usr/local
+			  Debug Build....: 
+			  C Compiler.....: gcc -std=gnu99 -g -O2 -Wall 
+			  Linker.........: /usr/bin/ld  -ldl 
+			
+			[root@localhost google-authenticator-libpam]# make 
+			make  all-am
+			make[1]: 进入目录“/root/google-authenticator-libpam”
+			  CC       src/pam_google_authenticator_la-pam_google_authenticator.lo
+			  CC       src/pam_google_authenticator_la-util.lo
+			  CC       src/pam_google_authenticator_la-base32.lo
+			  CC       src/pam_google_authenticator_la-hmac.lo
+			  CC       src/pam_google_authenticator_la-sha1.lo
+			  CCLD     pam_google_authenticator.la
+			  CC       src/google-authenticator.o
+			  CC       src/util.o
+			  CC       src/base32.o
+			  CC       src/hmac.o
+			  CC       src/sha1.o
+			  CCLD     google-authenticator
+			  CC       src/base32_prog.o
+			  CCLD     base32
+			make[1]: 离开目录“/root/google-authenticator-libpam”
+			[root@localhost google-authenticator-libpam]# make install
+			make[1]: 进入目录“/root/google-authenticator-libpam”
+			 /usr/bin/mkdir -p '/usr/local/bin'
+			  /bin/sh ./libtool   --mode=install /usr/bin/install -c google-authenticator '/usr/local/bin'
+			libtool: install: /usr/bin/install -c google-authenticator /usr/local/bin/google-authenticator
+			 /usr/bin/mkdir -p '/usr/local/share/doc/google-authenticator'
+			 /usr/bin/install -c -m 644 FILEFORMAT README.md '/usr/local/share/doc/google-authenticator'
+			 /usr/bin/mkdir -p '/usr/local/share/doc/google-authenticator'
+			 /usr/bin/install -c -m 644 totp.html '/usr/local/share/doc/google-authenticator'
+			 /usr/bin/mkdir -p '/usr/local/share/man/man1'
+			 /usr/bin/install -c -m 644 man/google-authenticator.1 '/usr/local/share/man/man1'
+			 /usr/bin/mkdir -p '/usr/local/share/man/man8'
+			 /usr/bin/install -c -m 644 man/pam_google_authenticator.8 '/usr/local/share/man/man8'
+			 /usr/bin/mkdir -p '/usr/local/lib/security'
+			 /bin/sh ./libtool   --mode=install /usr/bin/install -c   pam_google_authenticator.la '/usr/local/lib/security'
+			libtool: install: /usr/bin/install -c .libs/pam_google_authenticator.so /usr/local/lib/security/pam_google_authenticator.so
+			libtool: install: /usr/bin/install -c .libs/pam_google_authenticator.lai /usr/local/lib/security/pam_google_authenticator.la
+			libtool: finish: PATH="/syncthing/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin:/sbin" ldconfig -n /usr/local/lib/security
+			----------------------------------------------------------------------
+			Libraries have been installed in:
+			   /usr/local/lib/security
+			
+			If you ever happen to want to link against installed libraries
+			in a given directory, LIBDIR, you must either use libtool, and
+			specify the full pathname of the library, or use the `-LLIBDIR'
+			flag during linking and do at least one of the following:
+			   - add LIBDIR to the `LD_LIBRARY_PATH' environment variable
+			     during execution
+			   - add LIBDIR to the `LD_RUN_PATH' environment variable
+			     during linking
+			   - use the `-Wl,-rpath -Wl,LIBDIR' linker flag
+			   - have your system administrator add LIBDIR to `/etc/ld.so.conf'
+			
+			See any operating system documentation about shared libraries for
+			more information, such as the ld(1) and ld.so(8) manual pages.
+			----------------------------------------------------------------------
+			make[1]: 离开目录“/root/google-authenticator-libpam”
+
+6.复制google 身份验证器pam模块到系统下，根据版本和32/64位不同，目的目录可能有小区别，比如是/lib64/security/或者/usr/lib64/security/
+	[root@localhost security]# cp /usr/local/lib/security/pam_google_authenticator.so /usr/lib/security
+	
+7.创建使用google身份验证器的用户和组
+	vi /etc/pam.d/sshd
+		创建需要使用google身份验证器的用户
+			useradd user1
+			useradd user2
+		创建需要使用google身份验证器的组，在组中的使用google身份验证器，不在组中的不需要google身份验证器	
+			groupadd googleauth
+		将用户添加到组中
+			usermod -G googleauth user1
+			
+8.配置/etc/pam.d/sshd
+	vi /etc/pam.d/sshd
+	添加以下二行<<<<<<在googleauth组中的使用google身份验证器，不在组中的不需要google身份验证器	
+	auth       [success=1 default=ignore]   pam_succeed_if.so user notingroup googleauth
+	auth       required     pam_google_authenticator.so
+			[root@localhost ~]# cat /etc/pam.d/sshd			
+			#%PAM-1.0
+			auth       required     pam_sepermit.so
+			auth       [success=1 default=ignore]   pam_succeed_if.so user notingroup googleauth
+			auth       required     pam_google_authenticator.so
+			auth       substack     password-auth
+			auth       include      postlogin
+			# Used with polkit to reauthorize users in remote sessions
+			-auth      optional     pam_reauthorize.so prepare
+
+9. 修改SSH服务配置/etc/ssh/sshd_config
+		ChallengeResponseAuthentication no 改为Yes
+			[root@localhost ~]# cat /etc/ssh/sshd_config
+			......
+			# Change to no to disable s/key passwords
+			ChallengeResponseAuthentication yes
+
+10.重启ssh服务
+		systemctl restart sshd
+		
+11.切换到需要验证的系统账户，这里以wanghx用户为例
+		运行程序google-authenticator
+				[wanghx@localhost ~]$ whoami
+				wanghx
+				[wanghx@localhost ~]$ google-authenticator
+				
+				Do you want authentication tokens to be time-based (y/n) y
+		选择输入 y
+		之后出现的网址为生成的二维码图形地址（需要翻墙才能打开），还会生成密钥
+				Warning: pasting the following URL into your browser exposes the OTP secret to Google:  
+				......
+				<<<<<<这里有二维码
+				......
+				Your new secret key is: *************<<<<<<这里有KEY
+		在这里用二维码或者KEY登录google authentication ，就会生成动态密码了，用动态密码输入以下以验证
+					Enter code from app (-1 to skip): 
+					Code incorrect (correct code 933887). Try again.
+					Enter code from app (-1 to skip): ********
+					Code confirmed
+		输入正确之后，就会生成5个紧急验证码(当无法获取动态验证码时使用，注意：这5个验证码用一个就会少一个！请保存好
+					Your emergency scratch codes are:
+					  ************
+					  ************
+					  ************
+					  ************
+					  ************
+		之后出现的几个选择输入的地方，全输入y					
+					Do you want me to update your "/home/wanghx/.google_authenticator" file? (y/n) y
+					
+					Do you want to disallow multiple uses of the same authentication
+					token? This restricts you to one login about every 30s, but it increases
+					your chances to notice or even prevent man-in-the-middle attacks (y/n) y
+					
+					By default, a new token is generated every 30 seconds by the mobile app.
+					In order to compensate for possible time-skew between the client and the server,
+					we allow an extra token before and after the current time. This allows for a
+					time skew of up to 30 seconds between authentication server and client. If you
+					experience problems with poor time synchronization, you can increase the window
+					from its default size of 3 permitted codes (one previous code, the current
+					code, the next code) to 17 permitted codes (the 8 previous codes, the current
+					code, and the 8 next codes). This will permit for a time skew of up to 4 minutes
+					between client and server.
+					Do you want to do so? (y/n) y
+					
+					If the computer that you are logging into isn't hardened against brute-force
+					login attempts, you can enable rate-limiting for the authentication module.
+					By default, this limits attackers to no more than 3 login attempts every 30s.
+					Do you want to enable rate-limiting? (y/n) y
+		退出xshell，重新登录，这里就需要google验证码了。
+		
+		
+12.打开xshell(其他终端类似)，选择登陆主机的属性。设置登陆方法为Keyboard Interactive
+		确定，然后连接。
+		这里会弹出要求输入google验证的动态验证码，“Verification code: ”
+		这个去手机Google身份验证器找到6位数的动态密码填上
+		然后是输入密码“Password: ”
+		完成登录
+
+
+
+
+13.取消某个用户google二次验证。
+	将要取消google二次验证的用户从googleauth组中移除也可以
+		gpasswd -d user1 googleauth		
+			//添加是
+							usermod -G groupname username		//这个命令可以添加一个用户到指定的组，但是以前添加的组就会清空掉。
+							gpasswd -a username groupname 	//想要添加一个用户到一个组，同时保留以前添加的组时，请使用gpasswd这个命令来添加操作用户）
+
+	用id user1来查看用户是否还属于googleauth组
+		id user1
+	重启ssh服务
+		systemctl restart sshd
+14.关闭google二次验证。
+	修改配置/etc/pam.d/sshd
+		vi /etc/pam.d/sshd去掉/注释掉以下二行
+			auth       [success=1 default=ignore]   pam_succeed_if.so user notingroup googleauth
+			auth       required     pam_google_authenticator.so
+	修改SSH服务配置/etc/ssh/sshd_config
+		ChallengeResponseAuthentication Yes 改为 no
+		或者注释掉这一行
+	重启ssh服务
+		systemctl restart sshd

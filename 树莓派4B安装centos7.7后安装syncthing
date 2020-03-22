@@ -1,0 +1,90 @@
+
+
+获取软件包
+	#下载软件包，如果发现不能顺畅下载，那可能是墙的锅，手动下载了再通过 SFTP 上传到 /home/pi 目录下也可以
+	wget https://github.com/syncthing/syncthing/releases/download/v1.4.0/syncthing-linux-arm-v1.4.0.tar.gz
+			[root@localhost /]# wget https://github.com/syncthing/syncthing/releases/download/v1.4.0/syncthing-linux-arm-v1.4.0.tar.gz
+			--2020-03-21 18:09:34--  https://github.com/syncthing/syncthing/releases/download/v1.4.0/syncthing-linux-arm-v1.4.0.tar.gz
+			Resolving github.com (github.com)... 192.30.255.113
+			Connecting to github.com (github.com)|192.30.255.113|:443... connected.
+			HTTP request sent, awaiting response... 302 Found
+			Location: https://github-production-release-asset-2e65be.s3.amazonaws.com/14712850/1fcd1e80-6820-11ea-8643-9e5f48df2ac1?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20200321%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20200321T100935Z&X-Amz-Expires=300&X-Amz-Signature=a1c075efbead0e6f39b7d4a4bbc89dbcb8f3ab725ee09b58f348e73ed97c6eca&X-Amz-SignedHeaders=host&actor_id=0&response-content-disposition=attachment%3B%20filename%3Dsyncthing-linux-arm-v1.4.0.tar.gz&response-content-type=application%2Foctet-stream [following]
+			--2020-03-21 18:09:35--  https://github-production-release-asset-2e65be.s3.amazonaws.com/14712850/1fcd1e80-6820-11ea-8643-9e5f48df2ac1?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20200321%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20200321T100935Z&X-Amz-Expires=300&X-Amz-Signature=a1c075efbead0e6f39b7d4a4bbc89dbcb8f3ab725ee09b58f348e73ed97c6eca&X-Amz-SignedHeaders=host&actor_id=0&response-content-disposition=attachment%3B%20filename%3Dsyncthing-linux-arm-v1.4.0.tar.gz&response-content-type=application%2Foctet-stream
+			Resolving github-production-release-asset-2e65be.s3.amazonaws.com (github-production-release-asset-2e65be.s3.amazonaws.com)... 52.217.13.140
+			Connecting to github-production-release-asset-2e65be.s3.amazonaws.com (github-production-release-asset-2e65be.s3.amazonaws.com)|52.217.13.140|:443... connected.
+			HTTP request sent, awaiting response... 200 OK
+			Length: 8901294 (8.5M) [application/octet-stream]
+			Saving to: 'syncthing-linux-arm-v1.4.0.tar.gz'
+			
+			100%[===================================================================================================================================================================================================>] 8,901,294   3.90MB/s   in 2.2s   
+			
+			2020-03-21 18:09:39 (3.90 MB/s) - 'syncthing-linux-arm-v1.4.0.tar.gz' saved [8901294/8901294]
+	#解压
+	[root@localhost /]# tar -zxvf syncthing-linux-arm-v1.4.0.tar.gz 
+	#强迫症表示要重命名缩短一下：
+	mv syncthing-linux-arm-v0.14.42 syncthing
+	#进入 syncthing 目录
+	cd syncthing
+	#给主程序加上执行权限
+	chmod +x syncthing
+	[root@localhost /]# chmod +x /syncthing/syncthing
+
+	配置
+	运行下面的命令编辑 Syncthing 的配置文件：
+	vi /root/.config/syncthing/config.xml
+	将 127.0.0.1:8384 修改为 0.0.0.0:8384 以便让其他终端可以访问到 Syncthing 的 WebUI。
+	
+	再次运行主程序
+	/syncthing/syncthing
+	不要中断程序，尝试用电脑或者手机的浏览器访问 Syncthing 的 WebUI，地址为
+	http://树莓派的IP地址:8384
+
+	可以尝试先升级，升级的时候不要运行
+	./syncthing --upgrade
+	
+	如果希望Syncthing在后台运行可以使用nohup命令来实现：
+	nohup syncthing &
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+syncthing-linux-arm-v1.4.0/etc/solaris-smf/README.md
+syncthing-linux-arm-v1.4.0/etc/solaris-smf/syncthing.xml
+syncthing-linux-arm-v1.4.0/.metadata/
+syncthing-linux-arm-v1.4.0/.metadata/release.sig
+syncthing-linux-arm-v1.4.0/README.txt
+syncthing-linux-arm-v1.4.0/AUTHORS.txt
+syncthing-linux-arm-v1.4.0/extra/
+syncthing-linux-arm-v1.4.0/extra/Getting-Started.pdf
+syncthing-linux-arm-v1.4.0/extra/FAQ.pdf

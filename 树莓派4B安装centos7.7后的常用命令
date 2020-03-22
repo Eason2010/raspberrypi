@@ -21,8 +21,145 @@ V1.0
 	              total        used        free      shared  buff/cache   available
 	Mem:           1.9G         89M        1.7G         16M        130M        1.8G
 	Swap:          487M          0B        487M
-  
-3.其他
+
+3.更改系统时区：
+timedatectl set-timezone Asia/Shanghai
+	[root@localhost ~]# timedatectl
+	      Local time: Sat 2020-03-21 03:03:22 UTC
+	  Universal time: Sat 2020-03-21 03:03:22 UTC
+	        RTC time: n/a
+	       Time zone: UTC (UTC, +0000)
+	     NTP enabled: yes
+	NTP synchronized: yes
+	 RTC in local TZ: no
+	      DST active: n/a
+	[root@localhost ~]# timedatectl set-timezone Asia/Shanghai
+	[root@localhost ~]# set -o vi 
+	[root@localhost ~]# timedatectl
+	      Local time: Sat 2020-03-21 11:03:41 CST
+	  Universal time: Sat 2020-03-21 03:03:41 UTC
+	        RTC time: n/a
+	       Time zone: Asia/Shanghai (CST, +0800)
+	     NTP enabled: yes
+	NTP synchronized: yes
+	 RTC in local TZ: no
+	      DST active: n/a 
+
+4.更新yum           
+	yum update 
+	
+5.支持中文
+	查询支持的语言
+	locale
+	安装中文支持
+	yum groupinstall chinese-support
+	再次查询，有中文了
+	locale -a |grep "zh_CN"
+	
+	临时更换语言
+		如果只是临时更换linux系统的语言环境，可以通过输入设置 LANG=语言名称， 如中文是 
+		Zn_CN
+	修改系统默认语言
+		以下方法是通过修改设置系统默认的语言配置
+		如vi etc/locale.conf（注意改好之后重启一下系统）
+			LANG="zh_CN.UTF-8"
+	
+	在SecureCRT里的会话选项 --> 外观 --> 字符编码 --> UTF-8 --> 重启会话，就支持中文显示了
+	临时支持中文
+	export LANG=zh_CN
+
+
+6.linux配置防火墙
+	systemctl status firewalld 查看状态
+	systemctl enable firewalld 启用防火墙 永久
+	systemctl stop firewalld 停止防火墙 重启后失效
+	systemctl disable firewalld 禁用防火墙 永久
+	systemctl start firewalld 启动
+	 
+	查看已打开的端口 netstat -anp
+	添加允许的端口 firewall-cmd --add-port=8080/tcp --permanent
+	若移除端口 firewall-cmd --permanent --remove-port=8080/tcp
+	
+7.root用户禁止/允许远程登录
+	vi /etc/ssh/sshd_config
+	将PermitRootLogin的值改成no		//禁止远程登录
+	将PermitRootLogin的值改成yes	//允许远程登录
+	将这一行最前面的#号去掉，保存
+	
+	重启sshd
+	systemctl restart sshd
+	
+	
+8. 删除不必要的用户和组
+		系统中默认的虚拟用户都是可以删掉的。如：bin、adm、lp、halt、mail、uucp、operator、games、gopher、ftp、dbus、vcsa、abrt、ntp、saslauth、postfix、tcpdump等。这些用户本身也是无法登录的，所以此项优化不是必须的。
+
+		centos7查看可登陆用户
+		cat /etc/passwd | grep -v /sbin/nologin | cut -d : -f 1
+		cat /etc/passwd | grep   /bin/bash | cut -d : -f 1
+		
+		删除不必要的用户
+		userdel adm
+		userdel lp
+		userdel sync
+		userdel shutdown
+		userdel halt
+		userdel news
+		userdel uucp
+		userdel operator
+		userdel games
+		userdel gopher
+		userdel ftp
+		
+		删除不必要的组
+		groupdel adm
+		groupdel lp
+		groupdel news
+		groupdel uucp
+		groupdel games
+		groupdel dip
+		groupdel pppusers
+
+	1.新建用户 
+		adduser testuser //新建testuser 用户 
+		passwd testuser //给testuser 用户设置密码
+	2.建工作组 
+		groupadd testgroup //新建test工作组
+	
+	3.新建用户同时增加工作组 
+		useradd -g testgroup testuser //新建testuser用户并增加到testgroup工作组
+			//注：：-g 所属组 -d 家目录 -s 所用的SHELL
+	
+	4.给已有的用户增加工作组 
+		usermod -G groupname username
+	
+	5.临时关闭 
+		在/etc/shadow文件中属于该用户的行的第二个字段（密码）前面加上就可以了。想恢复该用户，去掉即可 
+		//或者使用如下命令关闭用户账号： 
+		passwd testuser –l 
+		//重新释放： 
+		passwd testuser –u
+	
+	6.永久性删除用户账号 
+		userdel testuser 
+		groupdel testgroup 
+		usermod –G testgroup testuser //（强制删除该用户的主目录和主目录下的所有文件和子目录）
+	
+	7.显示用户信息 
+	id user 
+	cat /etc/passwd
+	
+	补充:查看用户和用户组的方法 
+	用户列表文件：/etc/passwd 
+	用户组列表文件：/etc/group 
+	查看系统中有哪些用户：cut -d : -f 1 /etc/passwd 
+	查看可以登录系统的用户：cat /etc/passwd | grep -v /sbin/nologin | cut -d : -f 1 
+	查看用户操作：w命令(需要root权限) 
+	查看某一用户：w 用户名 
+	查看登录用户：who 
+	查看用户登录历史记录：last
+                         
+
+7.其他
 uname -a # 查看内核/操作系统/CPU信息的linux系统信息  
 fdisk -l # 查看所有分区   
 swapon -s # 查看所有交换分区  
