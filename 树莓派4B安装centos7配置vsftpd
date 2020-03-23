@@ -1,0 +1,96 @@
+
+
+vsftpd
+
+vsftpd的配置文件
+/etc/vsftpd/vsftpd.conf	
+
+先做一个备份
+cp /etc/vsftpd/vsftpd.conf /etc/vsftpd/vsftpd.conf.20200323
+
+把配置文件里的注释去掉
+grep -v "#"   /etc/vsftpd/vsftpd.conf.20200323 > /etc/vsftpd/vsftpd.conf
+
+修改配置文件
+vi /etc/vsftpd/vsftpd.conf	
+	anonymous_enable=YES    <==设置是否允许匿名用户登录FTP服务器。默认为YES
+	local_enable=YES    <==是否允许本地用户登录FTP服务器。
+	write_enable=YES    <==是否对登录用户开启写权限。属全局性设置。
+	local_umask=022    <==设置本地用户的文件生成umask为022。
+	#anon_upload_enable=YES    <==是否允许匿名用户上传文件，默认为NO
+	#anon_mkdir_write_enable=YES  <==是否允许匿名用户创建目录，默认为NO
+	dirmessage_enable=YES    <==设置是否显示目录消息。若设置为YES，进入目录时候将显示该目录中message_file配置文件（.message）中的内容
+	xferlog_enable=YES     <==是否启用FTP上传或下载日志记录。
+	connect_from_port_20=YES   <==是够允许主动模式FTP。
+	#chown_uploads=YES    <==用于设置是否改变匿名用户上传的文档的属主。默认为NO。
+	#chown_username=whoever   <==设置匿名用户上传的文档的属主名。只有chown_uploads=YES时才有效。默认为root（建议不要为root用户）
+	#xferlog_file=/var/log/xferlog    <==设置日志文件名及路径。需启用xferlog_enable选项
+	xferlog_std_format=YES    <==日志文件是否使用标准的xferlog日志文件格式（与wu-ftpd使用的格式相同） 。
+	#idle_session_timeout=600    <==设置多长时间不对FTP服务器进行任何操作，则断开该FTP连接，单位为秒，默认为300
+	#data_connection_timeout=120   <==设置建立FTP数据连接的超时时间，默认为300秒。
+	#nopriv_user=ftpsecure    <==运行vsftpd需要的非特权系统用户，默认是nobody
+	#async_abor_enable=YES    <==是否识别异步ABOR请求
+	#ascii_upload_enable=YES    <==设置是否启用ASCII模式下载数据。默认为NO。
+	#ascii_download_enable=YES    <==设置是否启用ASCII模式上传数据。默认为NO。
+	#ftpd_banner=Welcome to blah FTP service.    <==该配置项用于设置比较简短的欢迎信息。若欢迎信息较多，则可使用banner_file配置项
+	#deny_email_enable=YES    <==黑名单设置。如果很讨厌某些email address，就可以使用此设定来取消他的登录权限
+	#banned_email_file=/etc/vsftpd/banned_emails    <==当deny_email_enable=YES时，可以利用这个设定项来规定哪些邮件地址不可登录vsftpd服务器
+	#chroot_local_user=YES   <==是否将实体用户限制在自己的家目录内,默认为NO
+	#chroot_list_enable=YES   <==设置是否启用chroot_list_file配置项指定的用户列表文件，默认为NO
+	#chroot_list_file=/etc/vsftpd/chroot_list  <==用于指定用户列表文件，该文件用于控制哪些用户限制在家目录
+	#ls_recurse_enable=YES    <==是否允许递归查询。默认为NO，以防止远程用户造成过量的I/O
+	listen=NO   <==设置vsftpd服务器是否以standalone模式运行,默认为NO
+	listen_ipv6=YES   <==是否监听ipv6地址
+	
+	pam_service_name=vsftpd    <==设置在PAM所使用的名称，默认值为vsftpd
+	userlist_enable=YES    <==决定/etc/vsftpd/user_list文件是否启用生效。YES则生效，NO不生效
+	tcp_wrappers=YES    <==用来设置vsftpd服务器是否与tcp wrapper相结合，进行主机的访问控制
+
+	use_localtime=YES    <==是否使用本地时间，默认为NO（默认使用GMT时间）
+	listen_port=21    <==vsftpd的端口号，默认为21
+	pasv_enable=YES    <==是否启用数据的被动模式连接，默认为YES
+	pasv_min_port=0    <==设置FTP被动模式连接的最小端口。默认为0，表示不受限制
+	pasv_max_port=0    <==设置FTP被动模式连接的最大端口。默认为0，表示不受限制
+	connect_timeout=60    <==PORT方式下建立数据连接的超时时间，单位为秒 ，默认为60
+	accept_timeout=60      <==被动（PASV）数据连接的超时时间，单位为秒，默认值为60
+	max_clients=0    <==vsftpd允许每个客户端的最大连接数，默认为0，表示不受限制
+	max_per_ip=0    <==vsftpd允许每个IP的最大连接数，默认为0，表示不受限制
+	local_max_rate=0    <==本地用户所能使用的最大传输速度。默认为0，表示不受限制
+	anon_max_rate=0     <==匿名用户所能使用的最大传输速度。默认为0，表示不受限制
+	anon_world_readable_only=YES    <==仅允许匿名用户具有下载可读文件的权限，默认为YES
+	anon_other_write_enable=YES    <==是否允许匿名用户具有除了写之外的权限，包括删除与修改文件和目录，默认为NO
+	ftp_username=ftp            <==定义匿名用户的账户名称，默认值为ftp。
+	no_anon_password=YES        <==匿名用户登录时是否询问口令。设置为YES，则询问。默认NO
+	anon_umask=022              <==设置匿名用户新增文档的umask。默认077
+
+	userlist_enable和userlist _deny选项不同时
+	userlist_enable=YES && userlist_deny=YES    <==/etc/vsftpd/user_list中的用户禁止访问
+	userlist_enable=YES && userlist_deny=NO     <==/etc/vsftpd/user_list中的用户允许访问
+	注意：/etc/vsftpd/ftpuser不受任何配制项的影响，它总是有效，它是一个黑名单。当userlist_enable=YES时，userlist_deny选项才会生效。当userlist_enable=YES，userlist_deny=YES时，user_list是一个黑名单；当userlist_enable=YES，userlist_deny=NO时，user_list是一个白名单。需要提醒的是，使用白名单后，匿名用户将无法登入！除非显式在user_list中加入一行：anonymous
+	
+
+
+开启21端口
+查看防火墙是否开了21端口
+[root@linuxserver var]# firewall-cmd --query-port=21/tcp
+no
+[root@linuxserver var]# firewall-cmd --permanent --query-port=21/tcp
+no
+
+查看防火墙开了哪些端口
+[root@linuxserver var]# firewall-cmd --zone=public --list-ports
+22/tcp 8384/tcp 8384/udp
+
+开启防火墙21端口
+[root@linuxserver var]# firewall-cmd --zone=public --add-port=21/tcp --permanent
+success
+
+重新加载防火墙配置
+[root@linuxserver var]# firewall-cmd --reload
+success
+
+重新启动防火墙
+[root@linuxserver var]# systemctl restart firewalld.service
+
+
+对于FlashFXP,需要在 站点 --> 站点管理器 --> 高级 --> 字符编码里手动选择 UTF-8，不然可能会显示乱码
