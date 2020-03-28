@@ -39,6 +39,9 @@ wifi配置
     如果SSID是隐藏了，要把SSID改为可发现。
 6. ifconfig //查看wifi的网卡是否获得IP了
 
+7. nmcli r wifi off 	//关闭wifi
+7. nmcli r wifi on 	//开启wifi
+
 
 
 根目录扩展

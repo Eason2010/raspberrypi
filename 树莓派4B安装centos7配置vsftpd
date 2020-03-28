@@ -94,3 +94,117 @@ success
 
 
 对于FlashFXP,需要在 站点 --> 站点管理器 --> 高级 --> 字符编码里手动选择 UTF-8，不然可能会显示乱码
+
+================================================================================
+哪些用户可以用vsftpd:
+
+1./etc/vsftpd/ftpuser里的用户不可以使用vsftpd
+	/etc/vsftpd/ftpuser不受任何配制项的影响，它总是有效，它是一个黑名单。里面的用户永远不可以访问vsftpd
+	
+2. userlist_enable=NO时，/etc/vsftpd/user_list文件不生效。
+	本地全体用户（除去ftpusers中的用户）可以登录vsftpd
+	无论userlist_deny项为何值都是无效的
+
+3. userlist_enable=YES时，/etc/vsftpd/user_list文件生效。
+	userlist_enable=YES && userlist_deny=YES    <==/etc/vsftpd/user_list中的用户禁止访问，即user_list是一个黑名单，所有出现在名单中的用户都会被拒绝登入Vsftpd，和2相比，就是本地全体用户（除去ftpusers中的用户，除去user_list中的用户）可以登录vsftpd
+	userlist_enable=YES && userlist_deny=NO     <==/etc/vsftpd/user_list中的用户允许访问，即user_list是一个白名单，只有出现在名单中的用户才会被允许登入(user_list之外的用户都被拒绝登入)；另外需要特别提醒的是：使用白名单后，匿名用户将无法登入！除非显式在user_list中加入一行：anonymous
+================================================================================
+哪些用户可以访问自己的目录之外:
+
+	#chroot_local_user=YES   <==是否将实体用户限制在自己的家目录内,默认为NO
+	#chroot_list_enable=YES   <==设置是否启用chroot_list_file配置项指定的用户列表文件，默认为NO
+	#chroot_list_file=/etc/vsftpd/chroot_list  <==用于指定用户列表文件，该文件用于控制哪些用户限制在家目录
+	
+1. chroot_local_user 是否将实体用户限制在自己的家目录内
+	 chroot_list_enable 设置是否启用chroot_list_file配置项指定的用户列表文件
+
+2. chroot_local_user=YES，chroot_list_enable=NO	//最严，没有任何例外
+	所用户都被限制在其主目录下
+	不使用chroot_list_file指定的用户列表，没有任何“例外”用户
+	
+3. chroot_local_user=YES，chroot_list_enable=YES	//启用chroot_list_file，只有在这个用户列表里的用户才可以例外
+	所有用户都被限制在其主目录下
+	使用chroot_list_file指定的用户列表，这些用户作为“例外”，不受限制
+	
+4. chroot_local_user=NO，chroot_list_enable=YES	//启用chroot_list_file，在这个用户列表里的用户都会受到限制
+	所有用户都不被限制其主目录下
+	使用chroot_list_file指定的用户列表，这些用户作为“例外”，受到限制
+	
+5. chroot_local_user=NO，chroot_list_enable=NO	//最松，没有任何限制
+	所有用户都不被限制其主目录下
+	不使用chroot_list_file指定的用户列表，没有任何“例外”用户
+================================================================================
+所以：
+1. 创建用户
+先创建用于vsftpd的用户：
+groupadd ftpgroup		//添加ftpgroup组
+useradd -g ftpgroup -d /opt/ftp -M ftpuser1  	//增加用户ftpuser1，把用户加到ftpgroup组中，设置其目录为/opt/ftp，不创建这个用户的home目录
+passwd ftpuser1		//修改ftpuser1的密码
+
+2.修改访问vsftpd的权限：
+	2.1 编辑/etc/vsftpd/ftpuser，在这里的用户都不可以使用vsftpd
+	2.2 编辑/etc/vsftpd/vsftpd.conf
+			userlist_enable=YES
+			userlist_deny=NO  
+			使/etc/vsftpd/user_list中的用户允许访问，即user_list是一个白名单，只有出现在名单中的用户才会被允许登入(user_list之外的用户都被拒绝登入)；另外需要特别提醒的是：使用白名单后，匿名用户将无法登入！除非显式在user_list中加入一行：anonymous
+	2.3 编辑/etc/vsftpd/user_list，
+			将允许使用vsftpd的用户，
+				比如添加ftpuser2添加到这个文件中，即只有ftpuser2被允许登入vsftpd
+	
+3.修改ftp用户权限:
+	3.1 编辑/etc/vsftpd/vsftpd.conf
+			chroot_local_user=YES
+			chroot_list_enable=YES
+			使所用户都被限制在其主目录下，
+			同时使用chroot_list_file指定的用户列表，这些用户作为“例外”，不受限制
+	3.2 编辑/etc/vsftpd/vsftpd.conf
+			chroot_list_file=/etc/vsftpd/chroot_list
+			将chroot_list_file指向/etc/vsftpd/chroot_list
+	3.3 编辑/etc/vsftpd/chroot_list，
+			添加允许访问自己的目录之外的ftp用户
+				比如添加ftpuser2，即只有ftpuser2在登陆后，不被限制在其主目录下。
+				
+4. 修改同时连接ftp的最大用户数:
+	4.1 编辑/etc/vsftpd/vsftpd.conf
+			max_clients=1	//同时连接的只能是一个用户，即有一个用户连接，就不可以有第二个用户连接了。
+================================================================================
+groupadd ftpgroup		//添加ftpgroup组
+cat /etc/group		//查看所有的组
+useradd -g ftpgroup -d /ftp/ftpuser1 -s /sbin/nologin -M ftpuser1	//增加用户ftpuser1，把用户加到ftpgroup组中，设置其目录为/ftp/ftpuser1，不创建这个用户的home目录，不让这个用户登录
+passwd ftpuser1		//修改ftpuser1的密码
+	
+usermod -s /sbin/nologin ftpuser1	//让用户ftpuser1不可以登录shell，即不给他shell，所以无法登录（只用于FTP）
+usermod -d /ftp/ftpuser2 ftpuser1 //修改用户ftpuser2的目录，不存在会创建，存在会保留里面内容
+usermod -g ftpgroup ftpuser1 //将用户ftpuser1添加到ftpgroup这个组里
+userdel -r ftpuser1		//删除ftpuser1这个用户，同时删除这用户的home目录
+
+vi /etc/pam.d/vsftpd
+	#auth       required    pam_shells.so
+	将这一行注释掉，不然没有Shell的用户不让登录，会报错 530 Login incorrect.
+
+编辑/etc/vsftpd/vsftpd.conf，
+	userlist_enable=YES
+	userlist_deny=NO
+
+编辑/etc/vsftpd/user_list
+	添加允许登入vsftpd的用户名
+	
+编辑/etc/vsftpd/vsftpd.conf，
+	chroot_local_user=YES
+	chroot_list_enable=YES
+	chroot_list_file=/etc/vsftpd/chroot_list
+
+编辑/etc/vsftpd/chroot_list
+	添加允许访问自己的目录之外的ftp用户
+		//从2.3.5之后，vsftpd增强了安全检查，如果用户被限定在了其主目录下，则该用户的主目录不能再具有写权限了！如果检查发现还有写权限，就会在登录的时候报错误 500 OOPS: vsftpd: refusing to run with writable root inside chroot ()
+			要修复这个错误，可以用命令chmod a-w /home/user去除用户主目录的写权限，注意把目录替换成你自己的。或者你可以在vsftpd的配置文件中增加下列两项中的一项：
+			allow_writeable_chroot=YES
+================================================================================
+启用vsftpd日志
+
+编辑/etc/vsftpd/vsftpd.conf，
+	xferlog_enable=YES //表明FTP服务器记录上传下载的情况
+	xferlog_std_format=YES	 xferlog_file=/var/log/xferlog //表明将记录的上传下载情况写在xferlog_file所指定的文件中， 即xferlog_file选项指定的文件中
+	
+	dual_log_enable=YES		vsftpd_log_file=/var/log/vsftpd.log	//启用双份日志。在用xferlog文件记录服务器上传下载情况的同时，vsftpd_log_file所指定的文件，即/var/log/vsftpd.log也将用来 记录服务器的传输情况
+================================================================================
