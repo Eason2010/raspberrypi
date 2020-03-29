@@ -39,3 +39,17 @@
 	将PermitRootLogin yes更改为PermitRootLogin no
 	如果PermitRootLogin前有注释#，需要取消该配置项前面的注释#
 	修改完后，重启sshd服务。命令：systemctl restart sshd
+
+4.修改 vi /etc/ssh/sshd_config
+	Port 2345	//将ssh端口改为2345，以是 1024 ～ 65535 之间的任意数字，不要和系统其他服务端口冲突即可。
+	PermitRootLogin no	//禁止root账号通过SSH登录
+	PermitEmptyPasswords no	//不允许空密码的用户登录，默认是no
+	UsePAM Yes	//开户UsePam认证
+	X11Forwarding no	//设置是否允许X11转发
+	Protocol 2	//选择SSH 协议版本  2
+	MaxAuthTries 6	//限制SSH客户端一次连接服务器，能测试的密码的次数
+	MaxSessions 2		//每个连接可以并行开启多少个会话（session），默认值是10.
+	MaxStartups 5 //限制处于联机页面的连接数，默认值10。联机页面就是当你登录ssh时，还没输入密码的页面。
+			三元组形式	10:30:60	10：当连接数达到10时就开始拒绝连接，不过不是全部拒绝; 30：当连接数到达10时，之后的连接有30的概率被拒绝掉;		60：当连接数达到60时，之后的连接就全部拒绝了
+			一个数字的形式	我们可以直接写个5，这样言简意赅，连接数达到5之前敞开玩，达到5后就不能玩了。
+	

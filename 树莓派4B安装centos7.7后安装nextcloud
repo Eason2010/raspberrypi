@@ -1,0 +1,61 @@
+1.Docker 需要lxc 和cgroup 支持,内核版本大于3.8，需要root 用户操作。	
+	查看版本 
+	cat /proc/version  
+	[root@localhost log]# cat /proc/version
+	Linux version 4.19.110-v7l.1.el7 (mockbuild@armhfp-02.bsys.centos.org) (gcc version 4.8.5 20150623 (Red Hat 4.8.5-39) (GCC)) #1 SMP Mon Mar 16 16:22:29 UTC 2020
+	
+	安装  cgroup
+	yum install libcgroup
+
+	安装docker
+	yum install docker
+	
+	启动docker
+	systemctl start docker
+	设置开机启动docker
+	systemctl enable docker
+	查看docker
+	docker info
+	查看 Docker 版本
+	docker -v
+	验证docker
+	docker run hello-world
+	查看所有下载的镜像
+	docker images
+	删除镜像
+	docker rmi imagesID	//上一条命令查看到的镜像的ID
+		如果删除不掉，可能是因为有已经退出的container还在，用命令查看docker ps -a已经退出的container
+		然后用docker rm ContainerID来删除已经退出的container，再删除镜像
+	查看运行的容器
+	docker ps
+	停止容器
+	docker stop CONTAINERID //上一条命令查看到的运行空器的id
+	
+2.安装nextcloud
+	搜索nextcloud镜像
+	docker search nextcloud
+	
+	拉取nextcloud的image
+	docker pull docker.io/nextcloud
+	
+	查看images
+	docker images
+	
+	创建主目录
+	mkdir /nextcloud
+	chmod -R 777 /nextcloud/
+	
+	运行nextcloud
+	docker run -d --restart=always --name nextcloud -p 9001:80 -v /nextcloud:/data docker.io/nextcloud
+	–name：设定容器名称为nextcloud
+	-p 9001:80 ：端口映射，将宿主机9001端口映射到容器中的80端口
+	-v /nextcloud:/var/www/html/data将容器中项目的data目录映射到本地/nextcloud目录下方便配置和数据保存
+	-d 是以后台形式启动
+	
+	浏览器访问9001端口，按照浏览器配置即可。
+	http://IP:9001
+	首次登陆需要注册用户，给管理员用户admin设置密码。
+		设置管理员账号和密码
+		选择MySQL数据库
+		输入数据库相关信息：用户名、密码、数据库名
+		

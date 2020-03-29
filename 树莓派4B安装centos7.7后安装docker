@@ -21,10 +21,16 @@
 	docker -v
 	验证docker
 	docker run hello-world
-	运行容器
-	docker ps
 	查看所有下载的镜像
 	docker images
+	删除镜像
+	docker rmi imagesID	//上一条命令查看到的镜像的ID
+		如果删除不掉，可能是因为有已经退出的container还在，用命令查看docker ps -a已经退出的container
+		然后用docker rm ContainerID来删除已经退出的container，再删除镜像
+	查看运行的容器
+	docker ps
+	停止容器
+	docker stop CONTAINERID //上一条命令查看到的运行空器的id
 	
 	
 2.安装portainer
@@ -55,7 +61,7 @@
 	docker volume create portainer_volume
 	
 	启动portainer容器
-	run -d -p 9000:9000 --restart=always -v /var/run/docker.sock:/var/run/docker.sock --name prtainer-test portainer/portainer
+	docker run -d -p 9000:9000 --restart=always -v /var/run/docker.sock:/var/run/docker.sock --name prtainer-test portainer/portainer
 	该语句用宿主机9000端口关联容器中的9000端口，并给容器起名为portainer-test。执行完该命令之后，使用该机器IP:PORT即可访问Portainer。
 	该容器命名为prtainer-test，将容器中portainer默认端口9000，映射到宿主机端口9001，使用socket映射 /var/run/docker.sock:/var/run/docker.sock，容器基于portainer/portainer镜像启动。
 	

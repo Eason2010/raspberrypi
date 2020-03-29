@@ -70,15 +70,43 @@ timedatectl set-timezone Asia/Shanghai
 
 
 6.linux配置防火墙
+	firewalld的基本使用
 	systemctl status firewalld 查看状态
 	systemctl enable firewalld 启用防火墙 永久
 	systemctl stop firewalld 停止防火墙 重启后失效
 	systemctl disable firewalld 禁用防火墙 永久
 	systemctl start firewalld 启动
 	 
+	配置firewalld-cmd
+	查看版本： firewall-cmd --version
+	查看帮助： firewall-cmd --help
+	显示状态： firewall-cmd --state
+	查看所有打开的端口： firewall-cmd --zone=public --list-ports
+	更新防火墙规则： firewall-cmd --reload
+	更新防火墙规则，重启服务： firewall-cmd --completely-reload
+	查看已激活的Zone信息:  firewall-cmd --get-active-zones
+	查看指定接口所属区域： firewall-cmd --get-zone-of-interface=eth0
+	拒绝所有包：firewall-cmd --panic-on
+	取消拒绝状态： firewall-cmd --panic-off
+	查看是否拒绝： firewall-cmd --query-panic
+	
+	信任级别，通过Zone的值指定
+	drop: 丢弃所有进入的包，而不给出任何响应 
+	block: 拒绝所有外部发起的连接，允许内部发起的连接 
+	public: 允许指定的进入连接 
+	external: 同上，对伪装的进入连接，一般用于路由转发 
+	dmz: 允许受限制的进入连接 
+	work: 允许受信任的计算机被限制的进入连接，类似 workgroup 
+	home: 同上，类似 homegroup 
+	internal: 同上，范围针对所有互联网用户 
+	trusted: 信任所有连接
+ 
+
 	查看已打开的端口 netstat -anp
-	添加允许的端口 firewall-cmd --add-port=8080/tcp --permanent
-	若移除端口 firewall-cmd --permanent --remove-port=8080/tcp
+	添加允许的端口 firewall-cmd --zone=public --add-port=8080/tcp --permanent
+	若移除端口 firewall-cmd --zone=public --remove-port=8080/tcp --permanent 
+	重新载入 firewall-cmd --reload
+	查看所有打开的端口 firewall-cmd --zone=public --list-ports
 	
 7.root用户禁止/允许远程登录
 	vi /etc/ssh/sshd_config
