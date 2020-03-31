@@ -43,7 +43,7 @@
 4.修改 vi /etc/ssh/sshd_config
 	Port 2345	//将ssh端口改为2345，以是 1024 ～ 65535 之间的任意数字，不要和系统其他服务端口冲突即可。
 	PermitRootLogin no	//禁止root账号通过SSH登录
-	PermitEmptyPasswords no	//不允许空密码的用户登录，默认是no
+	PermitEmptyPasswords no	//=不允许空密码的用户登录，默认是no
 	UsePAM Yes	//开户UsePam认证
 	X11Forwarding no	//设置是否允许X11转发
 	Protocol 2	//选择SSH 协议版本  2

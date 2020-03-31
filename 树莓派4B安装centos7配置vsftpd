@@ -208,3 +208,8 @@ vi /etc/pam.d/vsftpd
 	
 	dual_log_enable=YES		vsftpd_log_file=/var/log/vsftpd.log	//启用双份日志。在用xferlog文件记录服务器上传下载情况的同时，vsftpd_log_file所指定的文件，即/var/log/vsftpd.log也将用来 记录服务器的传输情况
 ================================================================================
+查看vsftpd日志
+在/etc/vsftpd/ftpuser里的用户尝试登录FTP会被直接拒绝，不会记录在/var/log/vsftpd.log中
+当可以登录FTP的用户登录失败的时候，会记录在/var/log/vsftpd.log里，可以用下面的命令查看
+grep "FAIL LOGIN" /var/log/vsftpd.log
+================================================================================

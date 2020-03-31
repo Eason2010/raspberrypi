@@ -1,0 +1,36 @@
+linux 防止ssh暴力破解密码
+
+原理：
+收集 /var/log/secure 里面的信息，若是某个IP 链接次数超过一定次数 ，则把此ip记录到/etc/hosts.deny里面
+
+1. vi PreventSshCracking	//默认10次就加里
+#!/bin/bash
+#Denyhosts SHELL SCRIPT
+#2020-03-31
+cat /var/log/secure|awk '/Failed/{print $(NF-3)}'|sort|uniq -c|awk '{print $2"=" $1;}' >/usr/local/bin/Denyhosts.txt
+DEFINE="10"
+for i in `cat /usr/local/bin/Denyhosts.txt`
+do 
+        IP=`echo $i|awk -F= '{print $1}'`
+        NUM=`echo $i|awk -F= '{print $2}'`
+        if [ $NUM -gt $DEFINE ]
+        then
+                grep $IP /etc/hosts.deny >/dev/null
+                if [ $? -gt 0 ];
+                then
+                echo "sshd:$IP" >> /etc/hosts.deny
+                fi
+        fi
+done
+ 
+
+2. 添加到定时任务，10分钟执行一次
+	crontab -e
+	*/10 * * * * /usr/local/bin/denyhosts.sh
+	执行启动
+	systemctl resart crond
+	
+
+3. 把自己的IP排除在外
+	vi /etc/hosts.deny
+	#192.168.1.2	//把自己的IP加到host.deny文件里，并注释掉，这样脚本执行发现这个IP到次数，脚本要把这个IP加到hots.deny的时候发现已经在里面了（脚本不知道被注释掉），就不添加了。
